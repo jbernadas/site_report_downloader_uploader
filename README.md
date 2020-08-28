@@ -13,7 +13,7 @@ A sitemapper, which maps all the internal pages of a website. It includes a down
 
 3. Create a virtual environment inside the root directory.
    ```bash
-   python3 -m virtualenv venv
+   python3 -m venv venv
    ```
 4. Activate the virtual environment.
     * Windows: 
