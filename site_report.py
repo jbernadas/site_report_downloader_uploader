@@ -24,20 +24,22 @@ def counter_func(qualifiers):
 
 # Downloader - downloads either docs or images
 def downloader(qualifiers, folder):
+  session = requests.Session()
   xml_file = find_xml_report('.\site_report')
   doc = etree.parse('.\site_report\\' + xml_file)
   root = doc.getroot()
   count = 0
   count_type = counter_func(qualifiers)
+  
   for i in range(0, len(root.getchildren())):
     for qualifier in qualifiers:
       if (root[i][0]).text.endswith(qualifier):
         filename = os.path.join(folder, root[i][0].text.split('/')[-1])
         with open(filename, 'wb') as im:
-          im.write(requests.get(root[i][0].text).content)
+          im.write(session.get(root[i][0].text).content)
           count += 1
           print("Progress: {}/{}".format(count, count_type))
-
+  session.close()
   print("Finished downloading {} files!".format(count))
 
 # Where everything comes together
