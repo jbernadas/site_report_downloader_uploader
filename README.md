@@ -1,4 +1,4 @@
-# Site Report Downloader and Uploader
+# Site Report with File Downloader and Uploader
 A sitemapper, which maps all the internal pages of a website. It includes a downloader and uploader of all documents and images of a website.
 
 To use, start by cloning to your computer.
