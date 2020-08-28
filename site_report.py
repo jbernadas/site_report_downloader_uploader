@@ -11,9 +11,9 @@ def find_xml_report(directory):
       return file
 
 # Counter - counts how many type of files based on qualifiers
-def counter_func(qualifiers):
-  xml_file = find_xml_report('.\site_report')
-  doc = etree.parse('.\site_report\\' + xml_file)
+def counter_func(qualifiers, target_split):
+  xml_file = find_xml_report('./site_report/' + target_split)
+  doc = etree.parse('./site_report/' + target_split + '/' + xml_file)
   root = doc.getroot()
   counter = 0
   for i in range(0, len(root.getchildren())):
@@ -23,18 +23,19 @@ def counter_func(qualifiers):
   return counter
 
 # Downloader - downloads either docs or images
-def downloader(qualifiers, folder):
+def downloader(qualifiers, upload_folder, target_split):
   session = requests.Session()
-  xml_file = find_xml_report('.\site_report')
-  doc = etree.parse('.\site_report\\' + xml_file)
+  xml_file = find_xml_report('./site_report/' + target_split)
+  # folder = './site_report/' + target_split
+  doc = etree.parse('./site_report/' + target_split + '/' + xml_file)
   root = doc.getroot()
   count = 0
-  count_type = counter_func(qualifiers)
+  count_type = counter_func(qualifiers, target_split)
   
   for i in range(0, len(root.getchildren())):
     for qualifier in qualifiers:
       if (root[i][0]).text.endswith(qualifier):
-        filename = os.path.join(folder, root[i][0].text.split('/')[-1])
+        filename = os.path.join(upload_folder, root[i][0].text.split('/')[-1])
         with open(filename, 'wb') as im:
           im.write(session.get(root[i][0].text).content)
           count += 1
@@ -50,7 +51,15 @@ def main():
   httpRemoved = targetSite.replace("https://", "")
   targetSplit = httpRemoved.split(".")[0]
 
-  targetFolder = "./site_report/"
+  targetFolder = "./site_report/" + targetSplit
+
+  try:
+    # create the directory if it does not exist
+    os.mkdir(targetFolder)
+    os.mkdir(targetFolder + '/docs_for_upload')
+    os.mkdir(targetFolder + '/imgs_for_upload')
+  except FileExistsError:
+    print("Directory " + targetFolder + " already exists")
 
   # recreate original URL
   urlOrig = targetSite
@@ -69,8 +78,8 @@ def main():
   # run sitemap_gen.py on the original site
   os.system(executeOrig)
 
-  DOCS_FOR_UPLOAD = '.\site_report\docs_for_upload'
-  IMGS_FOR_UPLOAD = '.\site_report\imgs_for_upload'
+  DOCS_FOR_UPLOAD = './site_report/' + targetSplit + '/docs_for_upload'
+  IMGS_FOR_UPLOAD = './site_report/' + targetSplit + '/imgs_for_upload'
 
   DOC_QUALIFIERS = [
     '.pdf',
@@ -86,18 +95,18 @@ def main():
     '.gif'
   ]
   
-  doc_count = counter_func(DOC_QUALIFIERS)
-  img_count = counter_func(IMG_QUALIFIERS)
+  doc_count = counter_func(DOC_QUALIFIERS, targetSplit)
+  img_count = counter_func(IMG_QUALIFIERS, targetSplit)
 
   print("Begin document download!")
 
-  downloader(DOC_QUALIFIERS, DOCS_FOR_UPLOAD)
+  downloader(DOC_QUALIFIERS, DOCS_FOR_UPLOAD, targetSplit)
 
   print("----------")
 
   print("Begin image download!")
 
-  downloader(IMG_QUALIFIERS, IMGS_FOR_UPLOAD)
+  downloader(IMG_QUALIFIERS, IMGS_FOR_UPLOAD, targetSplit)
 
 if __name__ == "__main__":
   main()
