@@ -1,5 +1,5 @@
-# site_report_downloader_uploader
-A sitemapper with a downloader and uploader included.
+# Site Report Downloader and Uploader
+A sitemapper, which maps all the internal pages of a website. It includes a downloader and uploader of all documents and images of a website.
 
 To use, start by cloning to your computer.
 Create a virtual environment inside the root directory.
