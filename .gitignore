@@ -1,5 +1,6 @@
 *.log
 site_report/*
+!site_report/.gitkeep
 !site_report/docs_for_upload/.gitkeep
 !site_report/imgs_for_upload/.gitkeep
 venv/
