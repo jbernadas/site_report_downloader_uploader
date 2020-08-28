@@ -2,15 +2,15 @@
 A sitemapper, which maps all the internal pages of a website. It includes a downloader and uploader of all documents and images of a website.
 
 ## Installation
-Cloning to your computer.
+1. Clone to your computer.
 ```bash
 git clone git@github.com:jbernadas/site_report_downloader_uploader.git
-
-Cd into the newly created folder.
-Create a virtual environment inside the root directory.
+```
+1. Cd into the newly created folder.
+1. Create a virtual environment inside the root directory.
 ```bash
 python3 -m virtualenv venv
-
+```
 Activate the virtual environment.
 
 Activate virtual environement.
