@@ -173,6 +173,7 @@ class HTMLLoad:
             print("%s. Skipping..." % (msg))
 
         return self.page
+    
 #end class
 
 
