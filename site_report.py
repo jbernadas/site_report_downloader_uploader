@@ -24,7 +24,8 @@ def counter_func(qualifiers, target_split):
 
 # Downloader - downloads either docs or images
 def downloader(qualifiers, upload_folder, target_split):
-  session = requests.Session()
+  sess = requests.Session()
+  sess.keep_alive = False
   xml_file = find_xml_report('./site_report/' + target_split)
   # folder = './site_report/' + target_split
   doc = etree.parse('./site_report/' + target_split + '/' + xml_file)
@@ -37,11 +38,17 @@ def downloader(qualifiers, upload_folder, target_split):
       if (root[i][0]).text.endswith(qualifier):
         filename = os.path.join(upload_folder, root[i][0].text.split('/')[-1])
         with open(filename, 'wb') as im:
-          im.write(session.get(root[i][0].text).content)
+          im.write(sess.get(root[i][0].text).content)
           count += 1
-          print("Progress: {}/{}".format(count, count_type))
-  session.close()
-  print("Finished downloading {} files!".format(count))
+          if '.pdf' in qualifiers:
+            print("Document {}/{}".format(count, count_type))
+          else:
+            print("Image {}/{}".format(count, count_type))
+  
+  if '.pdf' in qualifiers:
+    print("Finished downloading {} files!".format(count))
+  else:
+    print("Finished downloading {} images!".format(count))
 
 # Where everything comes together
 def main():

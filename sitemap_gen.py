@@ -109,6 +109,7 @@ class HTMLLoad:
 
     def __init__(self, ratelimit=None):
         self.session = requests.Session()
+        self.session.keep_alive = False
         self.session.headers.update({'User-Agent': 'sitemap_gen/1.0'})
         if not ratelimit:
             ratelimit = 0.0
@@ -173,7 +174,6 @@ class HTMLLoad:
             print("%s. Skipping..." % (msg))
 
         return self.page
-    
 #end class
 
 
@@ -402,7 +402,7 @@ def generateSitemapFile(pageMap, fileName, changefreq="", priority=0.0):
 
     # creates a separate txt file with pertinent info
     txt_report = fileName.split('.')[1]
-    txt_report_title = txt_report.split('.')[-1]
+    txt_report_title = txt_report.split('\\')[-1]
 
     txt_output = open("./" + txt_report + '.txt', "wt")
 
