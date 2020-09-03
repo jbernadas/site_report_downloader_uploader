@@ -297,10 +297,6 @@ class MyHTMLParser(HTMLParser):
     #end def
 #end class
 
-# def imgAltInfo(image):
-#     if image.has_attr('alt'):
-#         imageSrc = image['src'].split
-
 def getUrlToProcess(pageMap):
     for i in pageMap.keys():
         if pageMap[i] is EMPTY:
@@ -344,8 +340,6 @@ def parsePages(loader, startUrl, maxUrls, blockExtensions):
             try:
                 parser.feed(page.decode("utf-8", errors='strict'))
                 parser.close()
-            # except UnicodeError:
-                # print("Failed decoding %s . Try to check if the page is valid." % (url))
             except UnicodeDecodeError:
                 pass
     #end while
