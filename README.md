@@ -29,7 +29,7 @@ A sitemapper, which maps all the internal pages of a website. It includes a down
 You might run into an issue while installing Reppy, this is due to the missing Microsoft Build Tools. This is available through the below link: https://download.microsoft.com/download/5/F/7/5F7ACAEB-8363-451F-9425-68A90F98B238/visualcppbuildtools_full.exe
 
 ## How to use
-The entry point is site_reporter.py so start it up by issuing command: 
+The entry point is site_report.py so start it up by issuing command: 
   ```bash 
   python3 site_report.py
   ```
