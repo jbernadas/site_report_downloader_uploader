@@ -23,6 +23,7 @@ import getopt
 import re
 import os
 import json
+from datetime import datetime
 import string
 import time
 import urllib.parse
@@ -314,10 +315,15 @@ def parsePages(loader, startUrl, maxUrls, blockExtensions):
     robotParser = getRobotParser(loader, startUrl)
     server = urllib.parse.urlsplit(startUrl)[1]
 
+    dont_parse = {'.pdf', '.doc', '.docx', '.jpg', '.png', '.gif', '.xls', '.xlsx', '.mov', '.mp3', '.mp4'}
+
     while True:
         url = getUrlToProcess(pageMap)
         if url is None:
             break
+        for skip in dont_parse:
+            if url.endswith(skip):
+                break
         print("  " + url)
         page = loader.get(url)
         if page is None:
@@ -477,7 +483,7 @@ def generateSitemapFile(pageMap, fileName, changefreq="", priority=0.0):
 def write_alt_info(fileName):
     fileN = fileName.split('\\')[1] 
     imgs_for_upload = re.sub(str(fileN), '', fileName)
-    with open(os.path.join(imgs_for_upload + '/imgs_for_upload/', 'alt-info.txt'), 'w+') as f:
+    with open(os.path.join(imgs_for_upload, 'alt-info.json'), 'w+') as f:
         json.dump(altInfo, f)
 
 def main():
@@ -536,12 +542,14 @@ def main():
         return 1
 
     # Start processing
-    print("Crawling the site...")
+    start_time = datetime.now()
+    print("Crawling the site..." )
+    print("Start time: %s" % (start_time))
     loader = HTMLLoad(ratelimit)
     pageMap = parsePages(loader, args[0], maxUrls, blockExtensions)
     print("Generating sitemap: %d URLs" % (len(pageMap)))
     generateSitemapFile(pageMap, fileName, changefreq, priority)
-    print("Finished.")
+    print("Finished mapping site.")
     write_alt_info(fileName)
     return 0
 #end def

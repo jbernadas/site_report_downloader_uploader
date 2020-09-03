@@ -3,6 +3,7 @@ import sitemap_gen
 from pprint import pprint
 import requests
 from lxml import etree
+from datetime import datetime
 
 # Finds the generated .xml report inside ./site_report directory
 def find_xml_report(directory):
@@ -55,8 +56,6 @@ def downloader(qualifiers, upload_folder, target_split):
 
 # DOCUMENT & IMAGE UPLOADER
 
-
-
 # HTML CLEANER
 
 # HTML DOCUMENT LINK CHANGER
@@ -73,6 +72,7 @@ def downloader(qualifiers, upload_folder, target_split):
 
 # DRUPAL UI CLICK SAVER
 
+# SCRIPT EXECUTION TIME
 
 # Where everything comes together
 def main():
@@ -139,5 +139,7 @@ def main():
 
   downloader(IMG_QUALIFIERS, IMGS_FOR_UPLOAD, targetSplit)
 
+  print("Finish time: %s" % (datetime.now()))
+  
 if __name__ == "__main__":
   main()
