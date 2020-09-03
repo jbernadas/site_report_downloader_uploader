@@ -22,9 +22,12 @@ def counter_func(qualifiers, target_split):
         counter += 1
   return counter
 
-# Downloader - downloads either docs or images
+# # Image ALT info file
+# altInfoFile = open(os.path.join(folder_location, 'alt-info.txt'), 'w+')
+
+# DOCUMENT & IMAGE Downloader - downloads either docs or images
 def downloader(qualifiers, upload_folder, target_split):
-  sess = requests.Session()
+  sess = requests.session()
   sess.keep_alive = False
   xml_file = find_xml_report('./site_report/' + target_split)
   # folder = './site_report/' + target_split
@@ -49,6 +52,27 @@ def downloader(qualifiers, upload_folder, target_split):
     print("Finished downloading {} files!".format(count))
   else:
     print("Finished downloading {} images!".format(count))
+
+# DOCUMENT & IMAGE UPLOADER
+
+
+
+# HTML CLEANER
+
+# HTML DOCUMENT LINK CHANGER
+
+# HTML DOWNLOADER
+
+# XML ITERATOR
+
+# DRUPAL LOGIN FUNC
+
+# HTML UPLOADER
+
+# DRUPAL USER INTERFACE IMAGE CHANGER
+
+# DRUPAL UI CLICK SAVER
+
 
 # Where everything comes together
 def main():
@@ -84,7 +108,7 @@ def main():
 
   # run sitemap_gen.py on the original site
   os.system(executeOrig)
-
+  
   DOCS_FOR_UPLOAD = './site_report/' + targetSplit + '/docs_for_upload'
   IMGS_FOR_UPLOAD = './site_report/' + targetSplit + '/imgs_for_upload'
 

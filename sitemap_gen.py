@@ -21,6 +21,8 @@
 import sys
 import getopt
 import re
+import os
+import json
 import string
 import time
 import urllib.parse
@@ -108,7 +110,7 @@ class HTMLLoad:
     """ load http(s) page """
 
     def __init__(self, ratelimit=None):
-        self.session = requests.Session()
+        self.session = requests.session()
         self.session.keep_alive = False
         self.session.headers.update({'User-Agent': 'sitemap_gen/1.0'})
         if not ratelimit:
@@ -197,6 +199,8 @@ def getRobotParser(loader, startUrl):
     return rp
 #end def
 
+altInfo = {}
+
 EMPTY = []
 
 class MyHTMLParser(HTMLParser):
@@ -228,7 +232,7 @@ class MyHTMLParser(HTMLParser):
                 print("BASE URL set to " + self.baseUrl)
 
         if tag.upper() == "A":
-            #print("Attrs: " + str(attrs))
+            # print("Attrs: " + str(attrs))
             url = ""
             # Let's scan the list of tag's attributes
             for attr in attrs:
@@ -259,10 +263,18 @@ class MyHTMLParser(HTMLParser):
 
         ### ADDED BY JB TO GET IMAGES AS WELL ###
         if tag.upper() == "IMG":
+            # print("Attrs: " + str(attrs))
             url = ""
+            img_name = ""
             for attr in attrs:
-                if (attr[0].upper() == "SRC"):
-                    url = joinUrls(self.baseUrl, attr[1])
+                if not attr[0].startswith("/llnl-docs/"): 
+                    if attr[0].upper() == "SRC":
+                        url = joinUrls(self.baseUrl, attr[1])
+                        img_name = url.split('/')[-1]
+                    
+                    if attr[0].upper() == "ALT":
+                        alt = attr[1]
+                        altInfo[img_name] = alt
             #end for
 
             if  url == "":
@@ -283,6 +295,10 @@ class MyHTMLParser(HTMLParser):
         ### END OF JB ADDED ###
     #end def
 #end class
+
+# def imgAltInfo(image):
+#     if image.has_attr('alt'):
+#         imageSrc = image['src'].split
 
 def getUrlToProcess(pageMap):
     for i in pageMap.keys():
@@ -457,6 +473,13 @@ def generateSitemapFile(pageMap, fileName, changefreq="", priority=0.0):
 
 #end def
 
+# Writes the alternative text info file
+def write_alt_info(fileName):
+    fileN = fileName.split('\\')[1] 
+    imgs_for_upload = re.sub(str(fileN), '', fileName)
+    with open(os.path.join(imgs_for_upload + '/imgs_for_upload/', 'alt-info.txt'), 'w+') as f:
+        json.dump(altInfo, f)
+
 def main():
     try:
         opts, args = getopt.getopt(sys.argv[1:],\
@@ -519,6 +542,7 @@ def main():
     print("Generating sitemap: %d URLs" % (len(pageMap)))
     generateSitemapFile(pageMap, fileName, changefreq, priority)
     print("Finished.")
+    write_alt_info(fileName)
     return 0
 #end def
 
