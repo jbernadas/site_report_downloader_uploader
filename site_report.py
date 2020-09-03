@@ -62,8 +62,6 @@ def downloader(qualifiers, upload_folder, target_split):
 
 # HTML DOWNLOADER
 
-# XML ITERATOR
-
 # DRUPAL LOGIN FUNC
 
 # HTML UPLOADER
@@ -140,6 +138,6 @@ def main():
   downloader(IMG_QUALIFIERS, IMGS_FOR_UPLOAD, targetSplit)
 
   print("Finish time: %s" % (datetime.now()))
-  
+
 if __name__ == "__main__":
   main()
