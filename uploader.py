@@ -23,23 +23,9 @@ def uploader(target_site, qualifiers, upload_dir, alt_info_type, fileCount):
     for qualifier in qualifiers:
       for filename in os.listdir('./' + upload_dir):      
         wait = WebDriverWait(driver, 300)
-        # if '.pdf' in qualifiers:
-        #   driver.get(target_site + '/media/add/document')
-        #   driver.find_element_by_id(
-        #     "edit-field-document-0-upload").send_keys(os.getcwd() + '\\' + upload_dir + '\\' + filename)
-        #   wait.until(presence_of_element_located(
-        #     (By.NAME, 'field_document_0_remove_button')))
-        #   driver.find_element(By.ID, 'edit-name-0-value').send_keys(filename)
-        #   wait.until(element_to_be_clickable((By.XPATH, 'html/body/div[2]/div[1]/main/div[4]/div[1]/form/div[8]/input[@id="edit-submit"]')))
-        #   count += 1
 
-        #   print("Document upload progress: {}/{}".format(count, (fileCount -1)))
-        #   continue
-        
-        # print("Finished uploading documents.")
-        # count = 0
         print("Begin uploading images.")
-        
+
         if '.jpg' in qualifiers:
           
           driver.get(target_site + '/media/add/image')
@@ -88,8 +74,7 @@ def main():
   DOCS = upload_root + '\\' + 'docs_for_upload'
   IMGS = upload_root + '\\' + 'imgs_for_upload'
   
-  docFileCount = sum([len(files) for r, d, files in os.walk(DOCS)])
-  imgFileCount = sum([len(files) for r, d, files in os.walk(IMGS)])
+  
 
   reconstitutedAltInfo = {}
 
