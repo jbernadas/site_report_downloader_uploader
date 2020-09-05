@@ -1,3 +1,9 @@
+#! /usr/bin/env python3 
+"""
+  This script creates a site-report and downloads documents and images.
+
+"""
+
 import os
 import sitemap_gen
 from pprint import pprint
