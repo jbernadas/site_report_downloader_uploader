@@ -23,9 +23,6 @@ def counter_func(qualifiers, target_split):
         counter += 1
   return counter
 
-# # Image ALT info file
-# altInfoFile = open(os.path.join(folder_location, 'alt-info.txt'), 'w+')
-
 # DOCUMENT & IMAGE Downloader - downloads either docs or images
 def downloader(qualifiers, upload_folder, target_split):
   sess = requests.session()

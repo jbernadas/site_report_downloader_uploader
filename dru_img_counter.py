@@ -1,9 +1,13 @@
 
+## A custom script specifically created for counting 
+## all uploaded images inside a Drupal website.
+
 import os
 import itertools
 from bs4 import BeautifulSoup
 import requests
 import sys
+import lxml
 from urllib.parse import urljoin
 from urllib.parse import urlparse
 from selenium import webdriver
@@ -43,11 +47,26 @@ def img_counter():
     img_page = target_site + site_img_page
     
     count = 0
+    img_count = 0
+
+    imgs = []
+    
+    # session = requests.session()
+    # session.keep_alive = False
 
     for i in range(0, int(max_count) + 1):
-      print("{}&page={}".format(img_page, count))
-      count += 1
-          
+      try:
+        driver.get("{}&page={}".format(img_page, count))
+        soup = BeautifulSoup(driver.page_source, 'lxml')
+        target_tds = soup.find_all('td', attrs={'class': 'views-field-filename'})
+        for td in target_tds:
+          print(td.a['href'].split('/')[-1])
+          img_count += 1   
+        count += 1
+      except:
+        driver.close()
+    
+    print("There are {} images in this website.".format(img_count))
     driver.close()
 
 def main():
