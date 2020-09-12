@@ -24,6 +24,7 @@ import os
 from bs4 import BeautifulSoup
 import requests
 import sys
+import json
 from urllib.parse import urljoin
 from urllib.parse import urlparse
 from selenium import webdriver
@@ -54,7 +55,7 @@ help_text = """
 
     Usage example:
 
-    python3 uploader.py -t doc http://target-prod.llnl.gov
+    python3 uploader.py doc http://target-prod.llnl.gov
 
 """
 def uploader(QUALS, TARGET_SITE):
@@ -106,26 +107,30 @@ def uploader(QUALS, TARGET_SITE):
     # The directory where our soon-to-be uploaded documents reside
     FILESDIR = ""
 
+    doc_types = ""
+
     if QUALS.upper() == "DOC":
         QUALIFIERS = DOC_QUALIFIERS
         FILESDIR = folder_location + "\\docs_for_upload"
+        doc_types = "documents"
 
     if QUALS.upper() == "IMG":
         QUALIFIERS = IMG_QUALIFIERS
-        FILESDIR = folder_location + site_name + "\\imgs_for_upload"
+        FILESDIR = folder_location + "\\imgs_for_upload"
+        doc_types = "images"
     
 
     fileCount = sum([len(files) for r, d, files in os.walk(FILESDIR)])
 
     count = 0
 
-    # initialize a wait variable that makes the driver wait for so many seconds
-    wait = WebDriverWait(driver, 120)
-
     reconstitutedAltInfo = {}
 
-    with open(os.path.join(folder_location, 'alt-info.txt')) as f:
+    with open(os.path.join(folder_location, 'alt-info.json')) as f:
         reconstitutedAltInfo = json.load(f)
+
+    # initialize a wait variable that makes the driver wait for so many seconds
+    wait = WebDriverWait(driver, 120)
 
     # For each qualifier in list of QUALIFIERS
     for qualifier in QUALIFIERS:
@@ -151,11 +156,10 @@ def uploader(QUALS, TARGET_SITE):
                 # rinse, repeat.
                 count += 1
 
-                print("Upload progress: {}/{}".format(count, (fileCount)))
+                print("Document upload progress: {}/{}".format(count, (fileCount)))
                 continue
 
             if filename.endswith(qualifier) and '.jpg' in QUALIFIERS:
-                print(filename)
                 driver.get(target_site + "/media/add/image")
                 driver.find_element_by_id("edit-image-0-upload").send_keys(os.getcwd() + '\\' + FILESDIR + '\\' + filename)
                 wait.until(presence_of_element_located((By.NAME, 'image_0_remove_button')))
@@ -175,13 +179,14 @@ def uploader(QUALS, TARGET_SITE):
                 ##  Automated  ##
                 ## if filename has corresponding alt text use it
                 if reconstitutedAltInfo.get(filename):
-                    alt_text = reconstitutedAltInfo
+                    alt_text = capitalize(reconstitutedAltInfo.get(filename))
                 ## otherwise
                 else:
                     ## use filename as alt text
                     strip_extension = filename.replace(qualifier, "")
                     underscore_to_space = strip_extension.replace("_", " ")
-                    alt_text = underscore_to_space.replace("-", " ")
+                    hyphen_to_space = underscore_to_space.replace("-", " ")
+                    alt_text = capitalize(hyphen_to_space)
                 
                 ## Name field cleaner
                 final_name = filename.replace("_", " ")
@@ -195,9 +200,12 @@ def uploader(QUALS, TARGET_SITE):
                 
                 ## Wait until button is clickable, then click it
                 wait.until(element_to_be_clickable((By.XPATH, 'html/body/div[2]/div[1]/main/div[4]/div[1]/form/div[10]/input[@id="edit-submit"]'))).click()
+                count += 1
+
+                print("Image upload progress: {}/{}".format(count, (fileCount)))
                 continue
 
-    print('Upload complete! {} of {} documents uploaded.'.format(count, (fileCount)))
+    print('Upload complete! {} of {} {} uploaded.'.format(count, (fileCount), doc_types))
     print('\a')
     # Exit the driver.
     driver.quit()

@@ -202,6 +202,13 @@ def getRobotParser(loader, startUrl):
 
 altInfo = {}
 
+image_ext = [
+    '.jpg',
+    '.png',
+    '.gif',
+    '.jpeg'
+]
+
 EMPTY = []
 
 class MyHTMLParser(HTMLParser):
@@ -244,6 +251,16 @@ class MyHTMLParser(HTMLParser):
                 elif (attr[0].upper() == "HREF") and (attr[1].upper().find('MAILTO:') == -1):
                     # We have discovered a link that is not a Mailto:
                     url = joinUrls(self.baseUrl, attr[1])
+                    img_name = url.split('/')[-1]
+
+                    if img_name.endswith(tuple(image_ext)):
+                        # If ALT text present:
+                        if attr[0].upper() == "ALT":
+                            alt = attr[1]
+                            altInfo[img_name] = alt
+                        # Else ALT text will be blank
+                        else:
+                            altInfo[img_name] = ""
             #end for
             # if the url is empty, there was none in the list of attributes
             if url == "":
@@ -261,6 +278,7 @@ class MyHTMLParser(HTMLParser):
             if not url in self.pageMap:
                 self.pageMap[url] = EMPTY
         #end if
+ 
 
         ### ADDED BY JB TO GET IMAGES AS WELL ###
         if tag.upper() == "IMG":
@@ -538,13 +556,19 @@ def main():
     # Start processing
     start_time = datetime.now()
     print("Crawling the site..." )
+    print("--------")
     print("Start time: %s" % (start_time))
+    print("--------")
     loader = HTMLLoad(ratelimit)
     pageMap = parsePages(loader, args[0], maxUrls, blockExtensions)
     print("Generating sitemap: %d URLs" % (len(pageMap)))
+    print("--------")
     generateSitemapFile(pageMap, fileName, changefreq, priority)
     print("Finished mapping site.")
+    print("--------")
     write_alt_info(fileName)
+    print("Created: 'alt_info.json' file.")
+    print("--------")
     return 0
 #end def
 
