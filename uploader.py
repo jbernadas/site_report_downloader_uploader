@@ -48,14 +48,18 @@ help_text = """
     Available options:
     -h         --help                       Print this text and exit
 
-    -t <doc or img> --type <doc or img>     Type of files you want to upload;
+    -f <doc or img> --file_type <doc or img>     Type of files you want to upload;
                                             choices are either 'doc' or 'img' (without the quotes).
                                             The case is insensitive, so for example DOC and doc are treated
                                             the same. You can use this option once.
 
     Usage example:
 
-    python3 uploader.py doc http://target-prod.llnl.gov
+    python3 uploader.py -f doc http://target-prod.llnl.gov
+
+    or 
+
+    python3 uploader.py --file_type img http://target-prod.llnl.gov
 
 """
 def uploader(QUALS, TARGET_SITE):
@@ -212,33 +216,39 @@ def uploader(QUALS, TARGET_SITE):
 
 def main():
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "ht", ["help", "type="])
+        opts, args = getopt.getopt(sys.argv[1:], "hf:v", ["help", "file_type="])
 
-    except getopt.GetoptError:
+    except getopt.GetoptError as err:
+        print(str(err))
         sys.stderr.write(help_text)
-        return 1
+        sys.exit(2)
 
-    QUALS = ""
+    file_type = ""
+    verbose = False
 
     for opt, arg in opts:
-        if opt in ("-h", "--help"):
+        if opt == "-v":
+            verbose = True
+        elif opt in ("-h", "--help"):
             sys.stderr.write(help_text)
             return 1
-        elif opt in ("-t", "type="):
-            QUALS = arg
-            if QUALS == (arg.upper() == "DOC"):
-                QUALS = DOC_QUALIFIERS
-            if QUALS == (arg.upper() == "IMG"):
-                QUALS = IMG_QUALIFIERS
-            if QUALS in ("", ".", ".."):
+        elif opt in ("-f", "--file_type"):
+            file_type = arg
+            if file_type == (arg.upper() == "DOC"):
+                file_type = DOC_QUALIFIERS
+            if file_type == (arg.upper() == "IMG"):
+                file_type = IMG_QUALIFIERS
+            if file_type in ("", ".", ".."):
                 sys.stderr.write("Please provide a qualifier type. Choices are 'doc' or 'img'.\n")
                 return 1
+        else:
+            assert False, "unhandled option"
     if not args:
         sys.stderr.write("You must provide the target URL to upload to.")
         return 1
 
     ## Fire up the uploader
-    uploader(args[0], args[1])
+    uploader(args[0], args[0])
 
 if __name__ == "__main__":
     try:
