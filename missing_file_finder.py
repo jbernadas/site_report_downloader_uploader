@@ -5,8 +5,8 @@
 
 import filecmp
 
-orig = 'site_report/wci/imgs_for_upload'
-prod = 'site_report/wci-prod/imgs_for_upload'
+orig = 'site_report/ldrd-annual/imgs_for_upload'
+prod = 'site_report/ldrd-annual-prod/imgs_for_upload'
 
 c = filecmp.dircmp(orig, prod)
 

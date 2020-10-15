@@ -555,9 +555,8 @@ def main():
 
     # Start processing
     start_time = datetime.now()
-    print("Crawling the site..." )
-    print("--------")
     print("Start time: %s" % (start_time))
+    print("Crawling the site..." )
     print("--------")
     loader = HTMLLoad(ratelimit)
     pageMap = parsePages(loader, args[0], maxUrls, blockExtensions)

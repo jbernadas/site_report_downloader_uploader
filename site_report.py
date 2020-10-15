@@ -1,9 +1,40 @@
 import os
+import time
+from urllib.parse import urlparse
+import getopt
+import sys
 import sitemap_gen
 from pprint import pprint
 import requests
 from lxml import etree
 from datetime import datetime
+
+help_text = """
+  ######################################################
+  ####   SITEREPORT.py version 0.0.1 (2020-09-06)   ####
+  ######################################################
+
+  This command line program initiates a site report and can also
+  download documents. Command line syntax:
+
+  python3 site_report.py <options> <target URL>
+
+  Available options:
+
+  -h          --help            Print this help text
+  -v          --verbose         Verbose command line output
+  -d          --download        Download all downloadable files. Available arguments for this are: yes, no, doc or img.
+
+
+  Usage example:
+
+  python3 site_report.py -d no http://target.llnl.gov
+
+  or
+
+  python3 site_report.py --download yes http://target.llnl.gov
+
+"""
 
 # Finds the generated .xml report inside ./site_report directory
 def find_xml_report(directory):
@@ -12,9 +43,9 @@ def find_xml_report(directory):
       return file
 
 # Counter - counts how many type of files based on qualifiers
-def counter_func(qualifiers, target_split):
-  xml_file = find_xml_report('./site_report/' + target_split)
-  doc = etree.parse('./site_report/' + target_split + '/' + xml_file)
+def counter_func(qualifiers, targetSplit):
+  xml_file = find_xml_report('./site_report/' + targetSplit)
+  doc = etree.parse('./site_report/' + targetSplit + '/' + xml_file)
   root = doc.getroot()
   counter = 0
   for i in range(0, len(root.getchildren())):
@@ -24,61 +55,39 @@ def counter_func(qualifiers, target_split):
   return counter
 
 # DOCUMENT & IMAGE Downloader - downloads either docs or images
-def downloader(qualifiers, upload_folder, target_split):
-  sess = requests.session()
-  sess.keep_alive = False
-  xml_file = find_xml_report('./site_report/' + target_split)
+def downloader(qualifiers, upload_folder, targetSplit, session):
+  xml_file = find_xml_report('./site_report/' + targetSplit)
   # folder = './site_report/' + target_split
-  doc = etree.parse('./site_report/' + target_split + '/' + xml_file)
+  doc = etree.parse('./site_report/' + targetSplit + '/' + xml_file)
   root = doc.getroot()
   count = 0
-  count_type = counter_func(qualifiers, target_split)
-  
+  count_type = counter_func(qualifiers, targetSplit)
+
   for i in range(0, len(root.getchildren())):
     for qualifier in qualifiers:
       if (root[i][0]).text.endswith(qualifier):
         filename = os.path.join(upload_folder, root[i][0].text.split('/')[-1])
         with open(filename, 'wb') as im:
-          im.write(sess.get(root[i][0].text).content)
+          im.write(session.get(root[i][0].text).content)
           count += 1
+          # Limit 2 requests per second
+          time.sleep(0.5)
           if '.pdf' in qualifiers:
-            print("Document {}/{}".format(count, count_type))
+            print("Downloading document {}/{}".format(count, count_type))
           else:
-            print("Image {}/{}".format(count, count_type))
+            print("Downloading image {}/{}".format(count, count_type))
   
   if '.pdf' in qualifiers:
     print("Finished downloading {} files!".format(count))
   else:
     print("Finished downloading {} images!".format(count))
 
-# DOCUMENT & IMAGE UPLOADER
 
-# HTML CLEANER
-
-# HTML DOCUMENT LINK CHANGER
-
-# HTML DOWNLOADER
-
-# XML ITERATOR
-
-# DRUPAL LOGIN FUNC
-
-# HTML UPLOADER
-
-# DRUPAL USER INTERFACE IMAGE CHANGER
-
-# DRUPAL UI CLICK SAVER
-
-# SCRIPT EXECUTION TIME
-
-# Where everything comes together
-def main():
-  targetSite = input("What is the target site? ")
-
-  # get only first part of target site
-  httpRemoved = targetSite.replace("https://", "")
-  targetSplit = httpRemoved.split(".")[0]
-
+def site_report(download, targetSite, session):
+  # parse the URL of targetSite
+  urlParsed = urlparse(targetSite)
+  
+  targetSplit = urlParsed.hostname.split(".")[0]
   targetFolder = "./site_report/" + targetSplit
 
   try:
@@ -93,19 +102,16 @@ def main():
   urlOrig = targetSite
 
   # only include web pages
-  onlyWebPages = "-b tif -b mpg -b txt -b zip -b psd -b mpeg -b wmv -b mp3 -b xls -b gz -b tar -b png -b jpg -b jpeg -b gif -b mov -b mp4 -b xlsx -b doc -b docx -b pdf"
+  # onlyWebPages = "-b tif -b mpg -b txt -b zip -b psd -b mpeg -b wmv -b mp3 -b xls -b gz -b tar -b png -b jpg -b jpeg -b gif -b mov -b mp4 -b xlsx -b doc -b docx -b pdf"
 
   # exclude tif mpg txt zip psd mpeg mp3 gz tar
-  excludeThese = "-b tif -b mpg -b txt -b zip -b psd -b mpeg -b mp3 -b gz -b tar"
+  exclude = "-b tif -b mpg -b txt -b zip -b psd -b mpeg -b mp3 -b gz -b tar"
 
-  # choose from the above variables what you want to include 
-  include = excludeThese
+  executeSitemapGen = "python .\sitemap_gen.py {} -r {} -o {} {}".format(exclude, 0, os.path.join(targetFolder, targetSplit) + ".xml", urlOrig)
 
-  executeOrig = "python ./sitemap_gen.py {} -o {} {}".format(include, os.path.join(targetFolder, targetSplit) + ".xml", urlOrig)
+  # run sitemap_gen.py
+  os.system(executeSitemapGen)
 
-  # run sitemap_gen.py on the original site
-  os.system(executeOrig)
-  
   DOCS_FOR_UPLOAD = './site_report/' + targetSplit + '/docs_for_upload'
   IMGS_FOR_UPLOAD = './site_report/' + targetSplit + '/imgs_for_upload'
 
@@ -120,21 +126,83 @@ def main():
   IMG_QUALIFIERS = [
     '.jpg',
     '.png',
-    '.gif'
+    '.gif',
+    'jpeg'
   ]
+
+  if download.upper() == "YES":
+    # wait for <n> seconds to give last session time to close
+    print("Preparing to download documents and images.")
+    
+    doc_count = counter_func(DOC_QUALIFIERS, targetSplit)
+    img_count = counter_func(IMG_QUALIFIERS, targetSplit)
+
+    print("Begin document download!")
+
+    downloader(DOC_QUALIFIERS, DOCS_FOR_UPLOAD, targetSplit, session)
+
+    print("----------")
+
+    print("Preparing to begin image download!")
+
+    downloader(IMG_QUALIFIERS, IMGS_FOR_UPLOAD, targetSplit, session)
   
-  doc_count = counter_func(DOC_QUALIFIERS, targetSplit)
-  img_count = counter_func(IMG_QUALIFIERS, targetSplit)
+  if download.upper() == "DOC":
 
-  print("Begin document download!")
+    doc_count = counter_func(DOC_QUALIFIERS, targetSplit)
 
-  downloader(DOC_QUALIFIERS, DOCS_FOR_UPLOAD, targetSplit)
+    print("Begin document download!")
 
-  print("----------")
+    downloader(DOC_QUALIFIERS, DOCS_FOR_UPLOAD, targetSplit, session)
 
-  print("Begin image download!")
+  if download.upper() == "IMG":
 
-  downloader(IMG_QUALIFIERS, IMGS_FOR_UPLOAD, targetSplit)
+    img_count = counter_func(IMG_QUALIFIERS, targetSplit)
+
+    print("Begin image download!")
+    downloader(IMG_QUALIFIERS, IMGS_FOR_UPLOAD, targetSplit, session)
+
+def main():
+  session = requests.Session()
+
+  try:
+    opts, args =  getopt.getopt(sys.argv[1:], "hd:v", ["help", "download="])
+  except getopt.GetoptError as err:
+    print(str(err))
+    sys.stderr.write(help_text)
+    sys.exit(2)
+
+  download = ""
+
+  for opt, arg in opts:
+    if opt == "-v":
+      verbose = True
+    elif opt in ("-h", "--help"):
+      sys.stderr.write(help_text)
+      return 1
+    elif opt in ("-d", "--download"):
+      if arg.upper() == "YES":
+        download = "YES"
+      if arg.upper() == "Y":
+        download = "YES"
+      if arg.upper() == "DOC":
+        download = "DOC"
+      if arg.upper() == "DOCS":
+        download = "DOC"
+      if arg.upper() == "IMG":
+        download = "IMG"
+      if arg.upper() == "IMGS":
+        download = "IMG"
+      else:
+        download = "NO"
+    else:
+      assert False, "unhandled option"
+  
+  if not args:
+    sys.stderr.write("You must provide the target URL.")
+    return 1
+
+  site_report(arg, args[0], session)
 
   print("Finish time: %s" % (datetime.now()))
   

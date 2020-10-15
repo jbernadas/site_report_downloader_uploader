@@ -28,8 +28,8 @@ def img_counter():
     parsedUrl = urlparse(target_site)
 
     ## Strips the following '.llnl.gov'
-    site_name = parsedUrl.hostname.split('-')[0]
-    
+    site_name = parsedUrl.hostname.split('.')[0]
+
     ## Login to site manually
     driver.get(target_site + '/login')
 
@@ -46,27 +46,49 @@ def img_counter():
 
     img_page = target_site + site_img_page
     
-    count = 0
+    pageCount = 0
     img_count = 0
 
     imgs = []
-    
-    # session = requests.session()
-    # session.keep_alive = False
 
     for i in range(0, int(max_count) + 1):
       try:
-        driver.get("{}&page={}".format(img_page, count))
+        if pageCount == 0:
+          driver.get(img_page)
+          print("Now working on page {}".format(pageCount))
+        else:
+          driver.get("{}&page={}".format(img_page, pageCount))
+          print("Now working on page {}".format(pageCount))
         soup = BeautifulSoup(driver.page_source, 'lxml')
         target_tds = soup.find_all('td', attrs={'class': 'views-field-filename'})
         for td in target_tds:
-          print(td.a['href'].split('/')[-1])
-          img_count += 1   
-        count += 1
+          onlyHref = td.a['href'].split('/')[-1]
+          if onlyHref in imgs:
+            continue
+          else:
+            # Adds image name to imgs list 
+            imgs.append(onlyHref)
+            print(onlyHref)
+            img_count += 1
+        print("Finished working on page {}".format(pageCount))
+        pageCount += 1
       except:
         driver.close()
-    
+
+    # Write the list of imgs to file
+    with open('./site_report/' + site_name + '/imgs-' + site_name + '.txt', 'w') as f:
+      for item in imgs:
+        f.write("{}\n".format(item)) 
+
     print("There are {} images in this website.".format(img_count))
+    print("Appending information into {}.txt".format(site_name))
+    if os.path.exists('./site_report/' + site_name + '/' + site_name + '.txt'):
+      file_obj = open('./site_report/' + site_name + '/' + site_name + '.txt', 'a')
+      file_obj.write("\nThe drupal_file_counter.py script counted {} images in this website.\nThis script provides a more accurate count of images on a Drupal website.".format(img_count))
+      file_obj.close()
+    else:
+      print('Unable to append report because ./site_report/' + site_name + '/' + site_name + '.txt does not exist.\nYou probably need to run site_report.py first to create this report.')
+
     driver.close()
 
 def main():

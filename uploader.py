@@ -73,7 +73,8 @@ def uploader(QUALS, TARGET_SITE):
     parsedUrl = urlparse(target_site)
 
     # Strips the following '.llnl.gov'
-    site_name = parsedUrl.hostname.split('-')[0]
+    site_name = parsedUrl.hostname.split('.')[0]
+    # site_name = site_name.replace('-prod','')
     
     # Login to site manually
     driver.get(target_site + '/login')
