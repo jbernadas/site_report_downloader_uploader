@@ -1,5 +1,7 @@
 *.log
 site_report/*
+site_reportORIG/*
+!site_reportORIG/.gitkeep
 !site_report/.gitkeep
 venv/
 __pycache__/sitemap_gen.cpython-38.pyc

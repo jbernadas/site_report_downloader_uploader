@@ -74,7 +74,11 @@ def uploader(QUALS, TARGET_SITE):
 
     # Strips the following '.llnl.gov'
     site_name = parsedUrl.hostname.split('.')[0]
-    # site_name = site_name.replace('-prod','')
+    prod_substring = '-prod'
+    if prod_substring in site_name:
+        site_name = site_name.replace('-prod','')
+    else:
+        pass
     
     # Login to site manually
     driver.get(target_site + '/login')
@@ -114,16 +118,23 @@ def uploader(QUALS, TARGET_SITE):
 
     doc_types = ""
 
-    if QUALS.upper() == "DOC":
-        QUALIFIERS = DOC_QUALIFIERS
-        FILESDIR = folder_location + "\\docs_for_upload"
-        doc_types = "documents"
+    try:
+        if QUALS.upper() == "DOC":
+            QUALIFIERS = DOC_QUALIFIERS
+            FILESDIR = folder_location + "\\docs_for_upload"
+            doc_types = "documents"
 
-    if QUALS.upper() == "IMG":
-        QUALIFIERS = IMG_QUALIFIERS
-        FILESDIR = folder_location + "\\imgs_for_upload"
-        doc_types = "images"
-    
+        if QUALS.upper() == "IMG":
+            QUALIFIERS = IMG_QUALIFIERS
+            FILESDIR = folder_location + "\\imgs_for_upload"
+            doc_types = "images"
+        
+        else:
+            pass
+        
+    except:
+        print("An exception occurred.")
+
 
     fileCount = sum([len(files) for r, d, files in os.walk(FILESDIR)])
 
@@ -191,7 +202,7 @@ def uploader(QUALS, TARGET_SITE):
                     strip_extension = filename.replace(qualifier, "")
                     underscore_to_space = strip_extension.replace("_", " ")
                     hyphen_to_space = underscore_to_space.replace("-", " ")
-                    alt_text = capitalize(hyphen_to_space)
+                    alt_text = hyphen_to_space.capitalize()
                 
                 ## Name field cleaner
                 final_name = filename.replace("_", " ")
@@ -249,7 +260,7 @@ def main():
         return 1
 
     ## Fire up the uploader
-    uploader(args[0], args[0])
+    uploader(arg, args[0])
 
 if __name__ == "__main__":
     try:

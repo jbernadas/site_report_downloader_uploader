@@ -1,0 +1,15 @@
+https://bbs.llnl.gov = 28 pages, 22 images = 16 hours
+https://biomaterials.llnl.gov = 9 pages, 22 images = 8 hours
+https://bnm.llnl.gov = 33 pages, 32 images = 24 hours
+https://catsid.llnl.gov = forms page
+https://ebg.llnl.gov = 17 pages, 14 images = 16 hours
+https://fmsi.llnl.gov = 11 pages, 53 images = 16 hours
+https://genomics.llnl.gov = 15 pages, 14 images = 16 hours
+https://healthsci.llnl.gov = 21 pages, 24 images = 16 hours
+https://mfescience.llnl.gov = 11 pages, 3 images = 12 hours
+https://microbio.llnl.gov = 9 pages, 8 images = 8 hours
+https://nuclear.llnl.gov = 24 hours
+https://opalopacity.llnl.gov = 74 pages, 3 images = 30 hours
+https://plsuser.llnl.gov = blank page 
+https://qsg.llnl.gov = 84 pages, 85 images = 40 hours
+https://wormhole.llnl.gov = blank page 
