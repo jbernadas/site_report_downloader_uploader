@@ -1,8 +1,13 @@
+#!/usr/bin/python3
+
 import os
+from bs4 import BeautifulSoup
 import time
 from urllib.parse import urlparse
+from urllib.parse import urljoin
 import getopt
 import sys
+import re
 import sitemap_gen
 from pprint import pprint
 import requests
@@ -83,10 +88,9 @@ def downloader(qualifiers, upload_folder, targetSplit, session):
     print("Finished downloading {} images!".format(count))
 
 
-def site_report(download, targetSite, session):
+def site_report(download, linkCheck, targetSite, session):
   # parse the URL of targetSite
   urlParsed = urlparse(targetSite)
-  
   targetSplit = urlParsed.hostname.split(".")[0]
   targetFolder = "./site_report/" + targetSplit
 
@@ -107,10 +111,12 @@ def site_report(download, targetSite, session):
   # exclude tif mpg txt zip psd mpeg mp3 gz tar
   exclude = "-b tif -b mpg -b txt -b zip -b psd -b mpeg -b mp3 -b gz -b tar"
 
-  executeSitemapGen = "python .\sitemap_gen.py {} -r {} -o {} {}".format(exclude, 0, os.path.join(targetFolder, targetSplit) + ".xml", urlOrig)
+  # executeSitemapGenXml = "python ./sitemap_gen.py {} -r {} -o {} {}".format(exclude, 0, os.path.join(targetFolder, targetSplit) + ".xml", urlOrig)
+  executeSitemapGenTxt = "python ./sitemap_gen.py {} -r {} -o {} {}".format(exclude, 0, os.path.join(targetFolder, targetSplit) + ".txt", urlOrig)
 
-  # run sitemap_gen.py
-  os.system(executeSitemapGen)
+  ## run sitemap_gen.py
+  # os.system(executeSitemapGenXml)
+  os.system(executeSitemapGenTxt)
 
   DOCS_FOR_UPLOAD = './site_report/' + targetSplit + '/docs_for_upload'
   IMGS_FOR_UPLOAD = './site_report/' + targetSplit + '/imgs_for_upload'
@@ -161,18 +167,23 @@ def site_report(download, targetSite, session):
 
     print("Begin image download!")
     downloader(IMG_QUALIFIERS, IMGS_FOR_UPLOAD, targetSplit, session)
+  
+  if linkCheck.upper() == "YES":
+    os.chdir(targetFolder)
+    os.system('scrapy runspider ../../broken_link_finder.py -o {}-broken-links.csv'.format(targetSplit))
 
 def main():
   session = requests.Session()
 
   try:
-    opts, args =  getopt.getopt(sys.argv[1:], "hd:v", ["help", "download="])
+    opts, args =  getopt.getopt(sys.argv[1:], "hdl:v", ["help", "download=", "linkcheck="])
   except getopt.GetoptError as err:
     print(str(err))
     sys.stderr.write(help_text)
     sys.exit(2)
 
   download = ""
+  linkcheck = ""
 
   for opt, arg in opts:
     if opt == "-v":
@@ -195,14 +206,21 @@ def main():
         download = "IMG"
       else:
         download = "NO"
+    elif opt in ("-l", "--linkcheck"):
+      if arg.upper() == "YES":
+        linkcheck = "YES"
+      if arg.upper() == "Y":
+        linkcheck = "YES"
+      else:
+        linkcheck = "NO"
     else:
       assert False, "unhandled option"
   
   if not args:
     sys.stderr.write("You must provide the target URL.")
     return 1
-
-  site_report(arg, args[0], session)
+  
+  site_report(args[0], args[2], args[3], session)
 
   print("Finish time: %s" % (datetime.now()))
   

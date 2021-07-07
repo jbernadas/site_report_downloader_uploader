@@ -329,7 +329,7 @@ def parsePages(loader, startUrl, maxUrls, blockExtensions):
     robotParser = getRobotParser(loader, startUrl)
     server = urllib.parse.urlsplit(startUrl)[1]
 
-    dont_parse = {'.pdf', '.doc', '.docx', '.jpg', '.png', '.gif', '.xls', '.xlsx', '.mov', '.mp3', '.mp4'}
+    dont_parse = {'.pdf', '.pptx', '.doc', '.docx', '.jpg', '.png', '.gif', '.xls', '.xlsx', '.mov', '.mp3', '.mp4'}
 
     while True:
         url = getUrlToProcess(pageMap)
@@ -382,63 +382,115 @@ def generateSitemapFile(pageMap, fileName, changefreq="", priority=0.0):
     wmvCount = 0
     pptxCount = 0
 
-    fw = open(fileName, "wt")
+    fileNameU = ""
+    
+    if fileName.endswith(".xml"):
+        fileNameU = fileName.replace(".xml","-urls.xml")
+    if fileName.endswith(".txt"):
+        fileNameU = fileName.replace(".txt", "-urls.txt")
 
-    fw.write('''<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n''')
-    for i in sorted(pageMap.keys()):
-        fw.write('<url>\n  <loc>%s</loc>\n' % (xml.sax.saxutils.escape(i)))
-        if isinstance(pageMap[i], datetime):
-            fw.write('  <lastmod>%4d-%02d-%02d</lastmod>\n' %
-                     (pageMap[i].year, pageMap[i].month, pageMap[i].day))
-        if changefreq != "":
-            fw.write('  <changefreq>%s</changefreq>\n' % (changefreq))
-        if priority > 0.0:
-            fw.write('  <priority>%1.1f</priority>\n' % (priority))
-        if i.endswith('.pdf'):
-            pdfCount += 1
-        if i.endswith('.jpg'):
-            imgCount += 1
-        if i.endswith('.jpeg'):
-            imgCount += 1
-        if i.endswith('.png'):
-            imgCount += 1
-        if i.endswith('.gif'):
-            imgCount += 1
-        if i.endswith('.doc'):
-            docCount += 1
-        if i.endswith('.docx'):
-            docxCount += 1
-        if i.endswith('.xls'):
-            xlsCount += 1
-        if i.endswith('.xlsx'):
-            xlsxCount += 1
-        if i.endswith('.mov'):
-            movCount += 1
-        if i.endswith('.mp3'):
-            mp3Count += 1
-        if i.endswith('.pps'):
-            ppsCount += 1
-        if i.endswith('.mp4'):
-            mp4Count += 1
-        if i.endswith('.flv'):
-            flvCount += 1
-        if i.endswith('.wmv'):
-            wmvCount += 1
-        if i.endswith('.pptx'):
-            pptxCount += 1
+    fw = open(fileNameU, "wt")
 
-        fw.write('</url>\n')
-        validUrlCount += 1
-    #end for
-    fw.write('</urlset>\n')
-    fw.close()
+    if fileNameU.upper().endswith(".XML"):
+        fw.write('''<?xml version="1.0" encoding="UTF-8"?>
+            <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n''')
+        for i in sorted(pageMap.keys()):
+            fw.write('<url>\n  <loc>%s</loc>\n' % (xml.sax.saxutils.escape(i)))
+            if isinstance(pageMap[i], datetime):
+                fw.write('  <lastmod>%4d-%02d-%02d</lastmod>\n' %
+                        (pageMap[i].year, pageMap[i].month, pageMap[i].day))
+            if changefreq != "":
+                fw.write('  <changefreq>%s</changefreq>\n' % (changefreq))
+            if priority > 0.0:
+                fw.write('  <priority>%1.1f</priority>\n' % (priority))
+            if i.endswith('.pdf'):
+                pdfCount += 1
+            if i.endswith('.jpg'):
+                imgCount += 1
+            if i.endswith('.jpeg'):
+                imgCount += 1
+            if i.endswith('.png'):
+                imgCount += 1
+            if i.endswith('.gif'):
+                imgCount += 1
+            if i.endswith('.doc'):
+                docCount += 1
+            if i.endswith('.docx'):
+                docxCount += 1
+            if i.endswith('.xls'):
+                xlsCount += 1
+            if i.endswith('.xlsx'):
+                xlsxCount += 1
+            if i.endswith('.mov'):
+                movCount += 1
+            if i.endswith('.mp3'):
+                mp3Count += 1
+            if i.endswith('.pps'):
+                ppsCount += 1
+            if i.endswith('.mp4'):
+                mp4Count += 1
+            if i.endswith('.flv'):
+                flvCount += 1
+            if i.endswith('.wmv'):
+                wmvCount += 1
+            if i.endswith('.pptx'):
+                pptxCount += 1
+
+            fw.write('</url>\n')
+            validUrlCount += 1
+        #end for
+        fw.write('</urlset>\n')
+        fw.close()
+    
+    if fileNameU.upper().endswith(".TXT"):
+        for i in sorted(pageMap.keys()):
+            fw.write('%s\n' % (xml.sax.saxutils.escape(i)))
+            if changefreq != "":
+                fw.write('  <changefreq>%s</changefreq>\n' % (changefreq))
+            if priority > 0.0:
+                fw.write('  <priority>%1.1f</priority>\n' % (priority))
+            if i.endswith('.pdf'):
+                pdfCount += 1
+            if i.endswith('.jpg'):
+                imgCount += 1
+            if i.endswith('.jpeg'):
+                imgCount += 1
+            if i.endswith('.png'):
+                imgCount += 1
+            if i.endswith('.gif'):
+                imgCount += 1
+            if i.endswith('.doc'):
+                docCount += 1
+            if i.endswith('.docx'):
+                docxCount += 1
+            if i.endswith('.xls'):
+                xlsCount += 1
+            if i.endswith('.xlsx'):
+                xlsxCount += 1
+            if i.endswith('.mov'):
+                movCount += 1
+            if i.endswith('.mp3'):
+                mp3Count += 1
+            if i.endswith('.pps'):
+                ppsCount += 1
+            if i.endswith('.mp4'):
+                mp4Count += 1
+            if i.endswith('.flv'):
+                flvCount += 1
+            if i.endswith('.wmv'):
+                wmvCount += 1
+            if i.endswith('.pptx'):
+                pptxCount += 1
+
+            validUrlCount += 1
+        #end for
+        fw.close()
 
     # creates a separate txt file with pertinent info
     txt_report = fileName.split('.')[1]
     txt_report_title = txt_report.split('\\')[-1]
 
-    txt_output = open("./" + txt_report + '.txt', "wt")
+    txt_output = open("./" + txt_report + '-numbers.txt', "wt")
 
     txt_output.write('####### %s WEBSITE REPORT #######\n' % (txt_report_title.upper()))
 
@@ -493,9 +545,14 @@ def generateSitemapFile(pageMap, fileName, changefreq="", priority=0.0):
 
 # Writes the alternative text info file
 def write_alt_info(fileName):
-    fileN = fileName.split('\\')[1] 
-    imgs_for_upload = re.sub(str(fileN), '', fileName)
-    with open(os.path.join(imgs_for_upload, 'alt-info.json'), 'w+') as f:
+    fileN = fileName.split('/')[-1]
+    extension_removed = ""
+    if fileN.endswith(".xml"):
+        extension_removed = re.sub('.xml', '', str(fileN))
+    if fileN.endswith(".txt"):
+        extension_removed = re.sub('.txt', '', str(fileN))
+    alt_info_file_path = os.path.join('./site_report', extension_removed)
+    with open(alt_info_file_path + '/imgs_for_upload/alt-info.json', 'w+') as f:
         json.dump(altInfo, f)
 
 def main():
@@ -511,7 +568,6 @@ def main():
     blockExtensions = []
     changefreq = ""
     priority = 0.0
-    fileName = "sitemap.xml"
     maxUrls = 50000
     pageMap = {}
     ratelimit = None
@@ -541,9 +597,13 @@ def main():
                 sys.stderr.write("Priority must be between 0.0 and 1.0\n")
                 return 1
         elif opt in ("-r", "--ratelimit"):
-            ratelimit = float(arg)
+            ratelimit = float(arg)            
         elif opt in ("-o", "--output-file"):
             fileName = arg
+            if fileName.upper().endswith('.TXT'):
+                fileFormat = 'TXT'
+            if fileName.upper().endswith('.XML'):
+                fileFormat = 'XML'
             if fileName in ("", ".", ".."):
                 sys.stderr.write("Please provide a sensible file name\n")
                 return 1
